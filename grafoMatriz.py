@@ -101,5 +101,101 @@ class Grafo:
                 for vizinho, peso in vizinhos.items():
                     arquivo.write(f"{vertice} {vizinho} {peso}\n")
 
-        print("Dados salvos no arquivo com sucesso.")
+    def fconex(self):
+        if not self.adj:
+            print("Grafo vazio.")
+            return
 
+        # Verifica se o grafo é direcionado ou não
+        direcionado = self._verificar_direcionado()
+
+        if direcionado:
+            # Grafo direcionado
+            componentes = self._kosaraju()
+            num_componentes = len(componentes)
+            if num_componentes == 1:
+                print("O grafo é fortemente conexo (C3).")
+            elif num_componentes == 2:
+                print("O grafo é semi-fortemente conexo (C2).")
+            elif num_componentes > 2:
+                print(f"O grafo possui {num_componentes} componente(s) fortemente conexa(s) (C3).")
+            else:
+                print("O grafo é desconexo (C0).")
+            print("Apresentando o grafo reduzido:")
+            self._apresentar_grafo_reduzido(componentes)
+        else:
+            # Grafo não direcionado
+            visitados = set()
+            fila = deque()
+            vertice_inicial = next(iter(self.adj.keys()))  # Seleciona o primeiro vértice do grafo
+            fila.append(vertice_inicial)
+            visitados.add(vertice_inicial)
+
+            while fila:
+                vertice = fila.popleft()
+                for vizinho in self.adj.get(vertice, {}):
+                    if vizinho not in visitados:
+                        fila.append(vizinho)
+                        visitados.add(vizinho)
+
+            if len(visitados) == len(self.adj):
+                print("O grafo é simplesmente conexo (C1).")
+            else:
+                print("O grafo é desconexo (C0).")
+
+    def _verificar_direcionado(self):
+        for vertice, vizinhos in self.adj.items():
+            for vizinho in vizinhos:
+                if vertice not in self.adj[vizinho]:
+                    return False  # Se não existe uma aresta de volta, é um grafo direcionado
+        return True
+
+    def _kosaraju(self):
+        visitados = set()
+        ordem_final = []
+        for vertice in self.adj.keys():
+            if vertice not in visitados:
+                self._dfs(vertice, visitados, ordem_final)
+        
+        grafo_transposto = self._transpor_grafo()
+        visitados.clear()
+        componentes = []
+
+        for vertice in reversed(ordem_final):
+            componente = []
+            if vertice not in visitados:
+                self._dfs_transposto(vertice, visitados, componente, grafo_transposto)
+                componentes.append(componente)
+
+        return componentes
+
+    def _dfs(self, vertice, visitados, ordem_final):
+        visitados.add(vertice)
+        for vizinho in self.adj.get(vertice, {}):
+            if vizinho not in visitados:
+                self._dfs(vizinho, visitados, ordem_final)
+        ordem_final.append(vertice)
+
+    def _transpor_grafo(self):
+        grafo_transposto = Grafo()
+        for vertice, vizinhos in self.adj.items():
+            for vizinho in vizinhos:
+                grafo_transposto.insereA(vizinho, vertice)
+        return grafo_transposto
+
+    def _dfs_transposto(self, vertice, visitados, componente, grafo_transposto):
+        visitados.add(vertice)
+        componente.append(vertice)
+        for vizinho in grafo_transposto.adj.get(vertice, {}):
+            if vizinho not in visitados:
+                self._dfs_transposto(vizinho, visitados, componente, grafo_transposto)
+
+    def _apresentar_grafo_reduzido(self, componentes):
+        grafo_reduzido = Grafo()
+        for componente in componentes:
+            for vertice in componente:
+                grafo_reduzido.qtde_vertices += 1
+                for vizinho, peso in self.adj.get(vertice, {}).items():
+                    if vizinho in componente:
+                        grafo_reduzido.insereA(vertice, vizinho, peso)
+        grafo_reduzido.show()
