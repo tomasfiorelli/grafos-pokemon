@@ -1,11 +1,11 @@
 import os
-from grafoMatriz import Grafo
+from grafo import Grafo
 
 def menu():
     print("=== RELAÇÃO DOS TIPOS DE POKÉMON EM GRAFO ===\n")
     print("Selecione uma opção:")
-    print("[1] Ler dados do arquivo grafo.txt")
-    print("[2] Gravar dados no arquivo grafo.txt")
+    print("[1] Ler dados de arquivo")
+    print("[2] Gravar dados nem arquivo")
     print("[3] Inserir vértice")
     print("[4] Inserir aresta")
     print("[5] Remover vértice")
@@ -26,25 +26,24 @@ def main():
         if opcao == "1":
             arquivo = input("Digite o nome do arquivo: ")
             try:
-                grafo.lerArquivo(arquivo)
-                print(f"Dados do arquivo {arquivo} lidos com sucesso.")
+                grafo.ler_arquivo(arquivo)
+                print(f"\nDados do arquivo {arquivo} lidos com sucesso.")
             except:
                 print(f"[ERRO] Não foi possível realizar a leitura do arquivo {arquivo}.")
-            input("\nPressione [ENTER] para voltar")
+        
         # 2
         elif opcao == "2":
             arquivo = input("Digite o nome do arquivo: ")
             try:
-                grafo.salvarArquivo(arquivo)
+                grafo.salvar_arquivo(arquivo)
                 print(f"Dados gravados no arquivo {arquivo} com sucesso.")
             except:
                 print(f"Não foi possível gravar os dados no arquivo {arquivo}.")
-            input("\nPressione [ENTER] para voltar")
 
         # 3
         elif opcao == "3":
             vertice = input("Digite o nome do vértice: ")
-            grafo.insereV(vertice)
+            grafo.insere_vertice(vertice)
             print(f"Vértice '{vertice}' inserido com sucesso.")
             input("\nPressione [ENTER] para voltar")
         
@@ -53,38 +52,32 @@ def main():
             origem = input("Digite o vértice de origem: ")
             destino = input("Digite o vértice de destino: ")
             peso = float(input("Digite o peso da aresta: "))
-            grafo.insereA(origem, destino, peso)
+            grafo.insere_aresta(origem, destino, peso)
             print(f"Aresta de '{origem}' para '{destino}' com peso {peso} inserida com sucesso.")
-            input("\nPressione [ENTER] para voltar")
         
         # 5
         elif opcao == "5":
             vertice = input("Digite o nome do vértice a ser removido: ")
-            grafo.removeV(vertice)
-            input("\nPressione [ENTER] para voltar")
+            grafo.remove_vertice(vertice)
         
         # 6
         elif opcao == "6":
             origem = input("Digite o vértice de origem da aresta a ser removida: ")
             destino = input("Digite o vértice de destino da aresta a ser removida: ")
-            grafo.removeA(origem, destino)
+            grafo.remove_aresta(origem, destino)
             print(f"Aresta de '{origem}' para '{destino}' removida com sucesso.")
-            input("\nPressione [ENTER] para voltar")
         
         # 7
         elif opcao == "7":
-            grafo.show()
-            input("\nPressione [ENTER] para voltar")
+            grafo.mostrar()
         
         # 8
         elif opcao == "8":
-            grafo.showMin()
-            input("\nPressione [ENTER] para voltar")
+            grafo.mostrar_minimo()
         
         # 9
         elif opcao == "9":
             grafo.fconex()
-            input("\nPressione [ENTER] para voltar")
         
         # 0
         elif opcao == "0":
@@ -94,7 +87,8 @@ def main():
         # DEFAULT
         else:
             print("Opção inválida. Por favor, selecione uma opção válida.")
-            input("\nPressione [ENTER] para voltar")
+        
+        input("\nPressione [ENTER] para voltar")
 
 if __name__ == "__main__":
     main()
