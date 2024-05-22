@@ -29,8 +29,7 @@ def menu_analises():
     print("Selecione uma opção:")
     print("[1] Triângulos perfeitos")
     print("[2] Relações completas")
-    print("[3] Subgrafos de Efetividade")
-    print("[4] Menu de análises")
+    print("[3] Grafos de Efetividade")
     print("[0] <- Voltar")
 
 def main():
@@ -110,7 +109,7 @@ def main():
                 
                 # 9
                 elif opcao_editor == "9":
-                    grafo.fconex()
+                    pass
                 
                 # 0
                 elif opcao_editor == "0":
@@ -164,11 +163,6 @@ def main():
                         grafo.gerar_imagem_grafo(nome_imagem, super_efetivo=False, efetivo=False, sem_efeito=False)
                     elif efetividade == '4':
                         grafo.gerar_imagem_grafo(nome_imagem, super_efetivo=False, efetivo=False, nao_efetivo=False)
-                    
-                
-                # 4
-                elif opcao_analises == "1":
-                    pass
 
                 # 0
                 elif opcao_analises == "0":

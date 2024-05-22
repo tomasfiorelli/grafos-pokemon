@@ -279,10 +279,7 @@ class Grafo:
 
         nx.draw(grafo, pos, with_labels=True, node_color='lightblue', font_size=8,
                 font_weight='bold', node_size=500, edge_color=[data['color'] for (u, v, data) in grafo.edges(data=True)],
-                # Define o formato dos nodos como retângulos com bordas arredondadas
                 node_shape='o')
-                # # Define o arredondamento das bordas do quadrado
-                # node_border_roundness=0.5)
         
         plt.title("Grafo de Tipos de Pokémon")
         plt.tight_layout()
