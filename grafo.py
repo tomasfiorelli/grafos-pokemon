@@ -6,6 +6,9 @@
 # RA: 10396285 | Raphael Iniesta Reis
 # RA: 10395687 | Tomás Fiorelli Barbosa
 
+import networkx as nx
+import matplotlib.pyplot as plt
+
 class Grafo:
     # construtor da classe 'Grafo'
     def __init__(self) -> None:
@@ -147,124 +150,143 @@ class Grafo:
             print()
         print("\nFim da impressao do grafo mínimo")
 
+    # -------
 
+    # Parte 2
+    def triangulos(self):
+        # relações de um triângulo perfeito
+        # TIPO_1 TIPO_2: 2.0
+        # TIPO_2 TIPO_3: 2.0
+        # TIPO_3 TIPO_1: 2.0
+        # TIPO_2 TIPO_1: 0.5
+        # TIPO_3 TIPO_2: 0.5
+        # TIPO_1 TIPO_3: 0.5
 
-#     def salvarArquivo(self, nome_arquivo):
-#         with open(nome_arquivo, 'w', encoding="utf-8") as arquivo:
-#             # Escreve o tipo de grafo
-#             arquivo.write("6\n")
+        triangulos = []
+        vertices = list(self.matriz.keys())
+        for i in range(len(vertices)):
+            for j in range(len(vertices)):
+                for k in range(len(vertices)):
+                    v1 = vertices[i]
+                    v2 = vertices[j]
+                    v3 = vertices[k]
 
-#             # Escreve a quantidade de vértices
-#             arquivo.write(f"{len(self.adj)}\n")
+                    if v1 == v2 or v1 == v3 or v2 == v3:
+                        continue
 
-#             # Escreve os rótulos dos vértices
-#             for vertice in self.adj.keys():
-#                 arquivo.write(f"{vertice}\n")
+                    # Verifica relações
+                    if (self.matriz[v1][v2] == 2.0 and
+                        self.matriz[v2][v3] == 2.0 and
+                        self.matriz[v3][v1] == 2.0 and
+                        self.matriz[v2][v1] == 0.5 and
+                        self.matriz[v3][v2] == 0.5 and
+                        self.matriz[v1][v3] == 0.5):
+                        # adiciona e ordena caso seja adicionado um
+                        # trio já existente e que esteja deslocado 
+                        triangulos.append(tuple(sorted((v1, v2, v3))))
 
-#             # Escreve a quantidade de arestas
-#             total_arestas = sum(len(vizinhos) for vizinhos in self.adj.values())
-#             arquivo.write(f"{total_arestas}\n")
+        # remove trios repetidos
+        triangulos = set(triangulos)
 
-#             # Escreve as arestas e pesos
-#             for vertice, vizinhos in self.adj.items():
-#                 for vizinho, peso in vizinhos.items():
-#                     arquivo.write(f"{vertice} {vizinho} {peso}\n")
+        print(f"\n{' Triângulos ':=^25}")
+        if triangulos:
+            for triangulo in triangulos:
+                print(f"{triangulo[0]} >> {triangulo[1]} >> {triangulo[2]}")
+        else:
+            print("Nenhum triângulo encontrado.")
+        print(f"{' ':=^25}")
 
-#     def fconex(self):
-#         if not self.adj:
-#             print("Grafo vazio.")
-#             return
+    def relacoes(self, vertice: str):
+        # relações de ataque
+        # forte (relação 2.0 | vertice -> outros)
+        # fraco (relação 0.5 | vertice -> outros)
+        # não afeta (relação 0.0 | vertice -> outros)
 
-#         # Verifica se o grafo é direcionado ou não
-#         direcionado = self._verificar_direcionado()
+        # relações de defesa
+        # Resistente (relação 0.5 | outros -> vertice)
+        # vulnerável (relação 2.0 | outros -> vertice)
+        # imune (relação 0.0 | outros -> vertice)
 
-#         if direcionado:
-#             # Grafo direcionado
-#             componentes = self._kosaraju()
-#             num_componentes = len(componentes)
-#             if num_componentes == 1:
-#                 print("O grafo é fortemente conexo (C3).")
-#             elif num_componentes == 2:
-#                 print("O grafo é semi-fortemente conexo (C2).")
-#             elif num_componentes > 2:
-#                 print(f"O grafo possui {num_componentes} componente(s) fortemente conexa(s) (C3).")
-#             else:
-#                 print("O grafo é desconexo (C0).")
-#             print("Apresentando o grafo reduzido:")
-#             self._apresentar_grafo_reduzido(componentes)
-#         else:
-#             # Grafo não direcionado
-#             visitados = set()
-#             fila = deque()
-#             vertice_inicial = next(iter(self.adj.keys()))  # Seleciona o primeiro vértice do grafo
-#             fila.append(vertice_inicial)
-#             visitados.add(vertice_inicial)
+        if vertice not in self.matriz:
+            print(f'O vértice "{vertice}" não existe no grafo.')
+            return
 
-#             while fila:
-#                 vertice = fila.popleft()
-#                 for vizinho in self.adj.get(vertice, {}):
-#                     if vizinho not in visitados:
-#                         fila.append(vizinho)
-#                         visitados.add(vizinho)
+        forte_contra = []
+        fraco_contra = []
+        nao_afeta = []
 
-#             if len(visitados) == len(self.adj):
-#                 print("O grafo é simplesmente conexo (C1).")
-#             else:
-#                 print("O grafo é desconexo (C0).")
+        resistente = []
+        vulneravel = []
+        imune = []
 
-#     def _verificar_direcionado(self):
-#         for vertice, vizinhos in self.adj.items():
-#             for vizinho in vizinhos:
-#                 if vertice not in self.adj[vizinho]:
-#                     return False  # Se não existe uma aresta de volta, é um grafo direcionado
-#         return True
+        for destino in self.matriz[vertice].keys():
+            if self.matriz[vertice][destino] == 2.0:
+                forte_contra.append(destino)
+            elif self.matriz[vertice][destino] == 0.5:
+                fraco_contra.append(destino)
+            elif self.matriz[vertice][destino] == 0.0:
+                nao_afeta.append(destino)
+            
+        for origem in self.matriz.keys():
+            if origem == vertice:
+                continue
 
-#     def _kosaraju(self):
-#         visitados = set()
-#         ordem_final = []
-#         for vertice in self.adj.keys():
-#             if vertice not in visitados:
-#                 self._dfs(vertice, visitados, ordem_final)
+            if self.matriz[origem][vertice] == 0.5:
+                resistente.append(origem)
+            elif self.matriz[origem][vertice] == 2.0:
+                vulneravel.append(origem)
+            elif self.matriz[origem][vertice] == 0.0:
+                imune.append(origem)
+
+        print(f"\n{' Relações de ' + vertice + ' ':=^45}")
+        print(f"{vertice} -> atacando")
+        print(f"- Forte contra:\t {', '.join(forte_contra) or '---'}")
+        print(f"- Fraco contra:\t {', '.join(fraco_contra) or '---'}")
+        print(f"- Não afeta:\t {', '.join(nao_afeta) or '---'}")
+        print(f"\n{vertice} -> defendendo")
+        print(f"- Resistente a:\t {', '.join(resistente) or '---'}")
+        print(f"- Vulnerável a:\t {', '.join(vulneravel) or '---'}")
+        print(f"- Imune a:\t {', '.join(imune) or '---'}")
+
+    def gerar_imagem_grafo(self, nome_arquivo: str,
+                           super_efetivo=True,
+                           efetivo=True,
+                           nao_efetivo=True,
+                           sem_efeito=True):
+
+        grafo = nx.DiGraph()
+
+        for vertice in self.matriz.keys():
+            grafo.add_node(vertice)
+
+        # atribuicao de cores
+        for origem, vizinhos in self.matriz.items():
+            for destino, peso in vizinhos.items():
+                if peso == 2.0 and super_efetivo:
+                    cor = 'green'
+                    grafo.add_edge(origem, destino, color=cor)
+                elif peso == 1.0 and efetivo:
+                    cor = 'black'
+                    grafo.add_edge(origem, destino, color=cor)
+                elif peso == 0.5 and nao_efetivo:
+                    cor = 'red'
+                    grafo.add_edge(origem, destino, color=cor)
+                elif peso == 0.0 and sem_efeito:
+                    cor = 'purple'
+                    grafo.add_edge(origem, destino, color=cor)
+
+        pos = nx.circular_layout(grafo)
+
+        nx.draw(grafo, pos, with_labels=True, node_color='lightblue', font_size=8,
+                font_weight='bold', node_size=500, edge_color=[data['color'] for (u, v, data) in grafo.edges(data=True)],
+                # Define o formato dos nodos como retângulos com bordas arredondadas
+                node_shape='o')
+                # # Define o arredondamento das bordas do quadrado
+                # node_border_roundness=0.5)
         
-#         grafo_transposto = self._transpor_grafo()
-#         visitados.clear()
-#         componentes = []
+        plt.title("Grafo de Tipos de Pokémon")
+        plt.tight_layout()
 
-#         for vertice in reversed(ordem_final):
-#             componente = []
-#             if vertice not in visitados:
-#                 self._dfs_transposto(vertice, visitados, componente, grafo_transposto)
-#                 componentes.append(componente)
-
-#         return componentes
-
-#     def _dfs(self, vertice, visitados, ordem_final):
-#         visitados.add(vertice)
-#         for vizinho in self.adj.get(vertice, {}):
-#             if vizinho not in visitados:
-#                 self._dfs(vizinho, visitados, ordem_final)
-#         ordem_final.append(vertice)
-
-#     def _transpor_grafo(self):
-#         grafo_transposto = Grafo()
-#         for vertice, vizinhos in self.adj.items():
-#             for vizinho in vizinhos:
-#                 grafo_transposto.insereA(vizinho, vertice)
-#         return grafo_transposto
-
-#     def _dfs_transposto(self, vertice, visitados, componente, grafo_transposto):
-#         visitados.add(vertice)
-#         componente.append(vertice)
-#         for vizinho in grafo_transposto.adj.get(vertice, {}):
-#             if vizinho not in visitados:
-#                 self._dfs_transposto(vizinho, visitados, componente, grafo_transposto)
-
-#     def _apresentar_grafo_reduzido(self, componentes):
-#         grafo_reduzido = Grafo()
-#         for componente in componentes:
-#             for vertice in componente:
-#                 grafo_reduzido.qtde_vertices += 1
-#                 for vizinho, peso in self.adj.get(vertice, {}).items():
-#                     if vizinho in componente:
-#                         grafo_reduzido.insereA(vertice, vizinho, peso)
-#         grafo_reduzido.show()
+        plt.savefig(nome_arquivo)
+        plt.close()
+        print(f'A imagem do grafo foi salva em {nome_arquivo}.')
